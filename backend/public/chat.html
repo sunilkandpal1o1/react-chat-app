@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Chat app</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        height: 100vh;
+        overflow: hidden;
+      }
+      #main {
+        width: 700px;
+        margin: 0 auto;
+      }
+      .header {
+        width: 50%;
+        height: 50px;
+        margin: 0 auto;
+        padding: 0 10px;
+        background-color: rgb(14, 21, 41);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .header-btn {
+        padding: 5px 10px;
+        border: none;
+        border-radius: 3px;
+        background-color: white;
+        cursor: pointer;
+      }
+      .header-btn:hover {
+        background-color: rgba(255, 255, 255, 0.829);
+      }
+      .requests {
+        display: none;
+        position: absolute;
+        top: 35px;
+        left: -60px;
+        max-height: 500px;
+        width: 300px;
+        background-color: rgb(251, 251, 251);
+        border-radius: 2px;
+        padding: 5px;
+        box-shadow: 0 0px 12px rgba(172, 170, 170, 0.45);
+      }
+      .request-sec {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: white;
+        margin-top: 5px;
+        padding: 8px 5px;
+        border-radius: 2px;
+        box-shadow: 0 1px 5px #acabab47;
+      }
+      .app {
+        display: flex;
+        width: 100%;
+      }
+      .side-bar {
+        flex-basis: 25%;
+        border: 1px grey solid;
+        border-radius: 10px;
+        padding: 15px;
+        margin-right: 4px;
+      }
+      #profile {
+        font-size: 20px;
+        font-weight: 400;
+        padding: 5px;
+        padding-bottom: 10px;
+        border-bottom: 1px dotted grey;
+      }
+
+      .list-item {
+        padding: 5px;
+        border-bottom: 1px solid rgba(98, 109, 89, 0.349);
+        cursor: pointer;
+      }
+      .active-chat {
+        background-color: rgba(121, 133, 124, 0.397);
+        color: rgb(70, 61, 61);
+      }
+      .new-chat {
+        background-color: rgb(126, 228, 126);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .chat-notifier {
+        background-color: rgb(54, 195, 54);
+        border-radius: 50%;
+        height: 22px;
+        width: 22px;
+        color: white;
+        font-size: 12px;
+        margin-right: 5px;
+        line-height: 22px;
+        font-weight: 700;
+        text-align: center;
+        pointer-events: none;
+      }
+      .chat-header {
+        background-color: rgba(91, 93, 89, 0.472);
+        font-size: 20px;
+        font-weight: 700;
+      }
+      .chat-input {
+        width: 300px;
+        height: 35px;
+        border: solid 1px #444;
+      }
+      .chat-submit {
+        width: 50px;
+        height: 35px;
+        border: solid 1px #444;
+      }
+      .chat-window {
+        height: 300px;
+        width: 400px;
+        overflow-y: scroll;
+        display: flex;
+        flex-direction: column-reverse;
+      }
+      #chatSection {
+        /* float: left; */
+        border: 1px grey solid;
+        border-radius: 10px;
+        padding: 10px;
+      }
+      .self-message {
+        padding: 10px 7px;
+        background-color: #d2fbdbab;
+        text-align: right;
+        border-bottom: 1px solid #adf6add0;
+      }
+      .others-message {
+        padding: 10px 7px;
+        background-color: rgba(182, 245, 245, 0.5);
+        text-align: left;
+        border-bottom: 1px solid rgba(161, 251, 251, 0.829);
+      }
+      .server-message {
+        padding: 10px 7px;
+        background-color: rgba(251, 209, 185, 0.602);
+        text-align: left;
+        border-bottom: 1px solid rgba(251, 205, 178, 0.89);
+      }
+      .msg {
+        display: inline-block;
+        padding: 10px 6px;
+        border: 1px solid #161616;
+        border-radius: 15px;
+        position: relative;
+        /* z-index: 10; */
+        background-color: white;
+      }
+      .msg::before,
+      .msg::after {
+        content: "";
+        width: 0px;
+        height: 0px;
+        position: absolute;
+      }
+
+      .msg-self:before {
+        /* content: "";
+        width: 0px;
+        height: 0px;
+        position: absolute; */
+        border-right: 8px solid #161616;
+        border-left: 8px solid transparent;
+        border-bottom: 8px solid #161616;
+        border-top: 8px solid transparent;
+        right: 2px;
+        top: 36px;
+        transform: rotateZ(-104deg);
+      }
+      .msg-self:after {
+        /* content: "";
+        width: 0px;
+        height: 0px;
+        position: absolute; */
+        border-right: 7px solid #fff;
+        border-left: 7px solid transparent;
+        border-bottom: 7px solid #fff;
+        border-top: 7px solid transparent;
+        right: 4px;
+        top: 35px;
+        transform: rotateZ(-104deg);
+      }
+      .msg-others:before {
+        /* content: "";
+        width: 0px;
+        height: 0px;
+        position: absolute; */
+        border-left: 8px solid #161616;
+        border-right: 8px solid transparent;
+        border-top: 8px solid #161616;
+        border-bottom: 8px solid transparent;
+        left: 2px;
+        top: 36px;
+        transform: rotateZ(-346deg);
+      }
+      .msg-others:after {
+        /* content: "";
+        width: 0px;
+        height: 0px;
+        position: absolute; */
+        border-left: 7px solid #fff;
+        border-right: 7px solid transparent;
+        border-top: 7px solid #fff;
+        border-bottom: 7px solid transparent;
+        left: 4px;
+        top: 35px;
+        transform: rotateZ(-346deg);
+      }
+      audio {
+        filter: sepia(20%) saturate(70%) grayscale(1) contrast(99%) invert(12%);
+        width: 222px;
+        height: 30px;
+      }
+      .sea {
+        /* display: none; */
+
+        position: absolute;
+        top: -100%;
+        left: 0;
+        height: 100vh;
+        width: 100%;
+        background-color: rgba(248, 248, 249, 0.98);
+        filter: blur(8);
+        padding: 30px;
+        z-index: 10;
+        transition: opacity 1s;
+        overflow-y: hidden;
+      }
+      .animate-down {
+        opacity: 1;
+        animation: slide-down 1s ease-out forwards;
+      }
+      .animate-up {
+        animation: slide-up 0.5s ease-out forwards;
+      }
+      @keyframes slide-down {
+        /* from {
+          transform: scale(0),
+        } */
+        80% {
+          top: 10%;
+        }
+        to {
+          top: 0;
+        }
+      }
+      @keyframes slide-up {
+        to {
+          top: -100%;
+        }
+      }
+      .flex-container {
+        display: flex;
+        justify-content: start;
+        height: 100%;
+        margin-top: 30px;
+      }
+      .close {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background-color: rgba(182, 180, 180, 0.945);
+        font-size: 28px;
+        padding: 5px 10px;
+        border-radius: 50%;
+        cursor: pointer;
+        z-index: 10;
+      }
+      .close:hover {
+        background-color: rgba(119, 117, 117, 0.972);
+      }
+      .left-half {
+        display: inline-block;
+        width: 49%;
+        height: 100%;
+        padding: 0 15px;
+        /* border-right: 2px solid black; */
+      }
+      .right-half {
+        display: inline-block;
+        width: 49%;
+        height: 100%;
+        padding: 0 15px;
+        border-left: 2px solid black;
+      }
+      .all-requests {
+        width: 100%;
+        height: 40%;
+        overflow-y: scroll;
+      }
+      .all-users {
+        width: 100%;
+        height: 100%;
+        /* overflow-y: scroll; */
+      }
+      .users-container {
+        border: 1px solid grey;
+        /* overflow-y: scroll; */
+      }
+
+      .contacts-sent {
+        /* display: inline-block; */
+        width: 100%;
+        height: 40%;
+        /* border-left: 2px solid black; */
+      }
+      .contacts {
+        height: 60%;
+      }
+      .users {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-evenly;
+        padding: 15px;
+        /* width: 50%; */
+      }
+      .user-sec {
+        margin: 0 10px;
+        margin-bottom: 20px;
+        padding: 5px;
+        width: 150px;
+        /* height: 150px; */
+        background-color: rgba(238, 242, 246, 0.87);
+        border-radius: 4px;
+        text-align: center;
+      }
+      .user-dp {
+        margin: 0 auto;
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background-color: rgb(43, 255, 0);
+        box-shadow: 0 2px 8px grey;
+      }
+      .user-name {
+        margin: 0 auto;
+        margin-top: 5px;
+        width: 90%;
+        height: 30px;
+        font-size: 20px;
+        /* background-color: blue; */
+      }
+      .btn {
+        background-color: rgb(0, 89, 255);
+        padding: 5px 15px;
+        cursor: pointer;
+        border: none;
+        border-radius: 3px;
+        color: white;
+        font-size: 16px;
+      }
+      .hundred {
+        height: 100%;
+        /* background-color: red; */
+      }
+      .fourty {
+        height: 40%;
+        /* background-color: blue; */
+      }
+      .sixty {
+        height: 60%;
+        /* background-color: rgb(255, 230, 0); */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sea">
+      <div class="flex-container">
+        <div class="left-half">
+          <div class="hundred">
+            <div class="all-users">
+              <h3>Connect with People</h3>
+              <div class="users-container">
+                <div id="all-users-div" class="users">
+                  <div class="user-sec">
+                    <div class="user-dp"></div>
+                    <div class="user-name"></div>
+                    <button class="btn">Connect</button>
+                  </div>
+                  <div class="user-sec">
+                    <div class="user-dp"></div>
+                    <div class="user-name"></div>
+                    <button class="btn">Connect</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="right-half">
+          <div class="fourty">
+            <div class="contacts-sent">
+              <h3>Sent Requests</h3>
+              <div class="users-container">
+                <div id="sent-requests-div" class="users">
+                  <div class="user-sec">
+                    <div class="user-dp"></div>
+                    <div class="user-name"></div>
+                    <button class="btn">Connect</button>
+                  </div>
+                  <div class="user-sec">
+                    <div class="user-dp"></div>
+                    <div class="user-name"></div>
+                    <button class="btn">Connect</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="sixty">
+            <div class="">
+              <h3>Contacts</h3>
+              <div class="users-container">
+                <div id="all-contacts-div" class="users">
+                  <div class="user-sec">
+                    <div class="user-dp"></div>
+                    <div class="user-name"></div>
+                    <button class="btn">Connect</button>
+                  </div>
+                  <div class="user-sec">
+                    <div class="user-dp"></div>
+                    <div class="user-name"></div>
+                    <button class="btn">Connect</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="close">X</div>
+    </div>
+
+    <div class="container">
+      <div class="header">
+        <button class="header-btn home-btn">Home</button>
+        <div style="position: relative">
+          <button class="header-btn requests-btn">Requests</button>
+          <div class="requests">
+            <span>Requests</span>
+            <div class="request-sec">
+              <span>Tester 1</span>
+              <button class="btn">Accept</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="main">
+        <h1>Nodejs + Socket Chat app</h1>
+        <div class="app">
+          <div class="side-bar">
+            <div id="profile"></div>
+            <div id="userList"></div>
+          </div>
+          <div id="chatSection">
+            <div class="chat-header"></div>
+            <div class="chat-window"></div>
+            <form class="chat-form">
+              <input type="text" class="chat-input" />
+
+              <input type="submit" class="chat-submit" value="Send" />
+              <button id="record" class="btn" value="start">WT</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="socket.io/socket.io.js"></script>
+    <script src="chat.js"></script>
+  </body>
+</html>
