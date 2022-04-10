@@ -235,5 +235,31 @@ router.post('/start-chat', auth, async (req, res) => {
   } catch (err) {
     console.log('error', err);
   }
-})
+});
+
+router.post("/get-active-chats", auth, async (req, res) => {
+  const username = req.body.username;
+  if (username) {
+    const currentUser = await User.findOne({ username: username });
+
+    let rooms = await Room.find({
+      members: { $in: currentUser.id },
+    }, { isGroup: 1 }).populate("members", { username: 1 });
+
+    rooms = rooms.map( room => {
+      const otherMember = room.members.find( member => member.username != username );
+
+      return {
+        id: room._id,
+        isGroup: room.isGroup,
+        otherMember
+      }
+    })
+    console.log("rooms", rooms);
+    res.status(200).json({ status: 0, data: rooms })
+  } else {
+    res.status(200).json({ status: 1, msg: "User not provided" })
+  }
+});
+
 export default router;
