@@ -1,5 +1,6 @@
 import express from "express";
-import socket from "socket.io";
+import { Server } from "socket.io";
+import http from 'http';
 import cors from 'cors';
 import bodyParser from "body-parser";
 const path = require("path");
@@ -26,7 +27,7 @@ let rooms = ["tech", "music", "business"];
 // let chat = [];
 
 app.use( cors({ 
-  allowOrigin: '*'
+  allowOrigin: "localhost:3000",
 }) );
 
 app.use( bodyParser.json());
@@ -35,14 +36,29 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(user)
 
-const server = app.listen(port, () => {
+const httpServer = http.createServer(app);
+
+const io = new Server(httpServer, {
+  cors: {
+    origin: 'http://localhost:3000'
+  }
+});
+
+httpServer.listen(port, () => {
   console.log("server running");
   console.log(`http://localhost:${port}`);
-});
-const io = socket(server);
-//auth middleware for socket
+})
+
+// const server = app.listen(port, () => {
+//   console.log("server running");
+//   console.log(`http://localhost:${port}`);
+// });
+// const io = socket(server);
+
+
+// auth middleware for socket
 io.use(async (socket, next) => {
-  console.log("socket middleware ", socket.handshake.auth.token);
+  console.log("socket middleware ", socket.handshake.auth);
   try {
     const token = socket.handshake.auth.token;
     // console.log(req.headers.authorization)
@@ -71,16 +87,15 @@ io.use(async (socket, next) => {
 
 io.on("connection", (socket) => {
   console.log("Some client connected");
-
   socket.on("newUser", (data) => {
     const username = data;
 
     // userList[socket.id] = username;
   });
-  console.log("joining room", socket.user.username);
-  socket.join(`${socket.user.username}`);
+  // console.log("joining room", socket.user.username);
+  // socket.join(`${socket.user.username}`);
 
-  socket.on("joinRoom", async ({ username, room }) => {
+  socket.on("join_room", async ({ username, room }) => {
     console.log("joinRoom", username, room);
     console.log("socket user", socket.user);
     const currentRoom = await Room.findById(room);
@@ -103,8 +118,8 @@ io.on("connection", (socket) => {
           createdAt: chat.createdAt,
         };
       });
-      console.log("older chats", olderChats);
-      socket.emit("olderChats", olderChats);
+      // console.log("older chats", olderChats);
+      socket.emit("older_chats", olderChats);
     } else {
       let indexOfNewUser = userList.findIndex((user) => {
         return user.id == socket.id && user.room == room;
@@ -165,15 +180,15 @@ io.on("connection", (socket) => {
   //   socket.emit('rooms', 'rooms');
   // })
 
-  socket.on("chat", async (data) => {
-    console.log("new message: ", data);
+  socket.on("new_chat", async (data) => {
+    console.log("new message: ", data, socket.user);
     try {
-      const roomId = data.room.split("-")[1];
-      const toUser = data.room.split("-")[0];
+      const roomId = data.room;
+      const toUser = data.room;
 
       const conversation = {
         from: socket.user.id,
-        msg: data.msg,
+        msg: data.message,
         room: roomId,
       };
 
@@ -200,11 +215,16 @@ io.on("connection", (socket) => {
 
       // fs.writeFileSync(`db/chats/${data.room}.json`, JSON.stringify(chat));
 
-      data["from"] = socket.user.username;
+      // data["from"] = socket.user.username;
+      const newMessage = {
+        from: socket.user.username,
+        msg: response.msg,
+        createdAt: response.createdAt,
+      }
       console.log("roomId on new chat", roomId);
       console.log("emiting new message to room", toUser);
-      socket.broadcast.to(`${toUser}`).emit("newMessage", data);
-      socket.broadcast.to(`${roomId}`).emit("newChat", data);
+      // socket.broadcast.to(`${toUser}`).emit("newMessage", data);
+      socket.broadcast.to(`${roomId}`).emit("new_message", newMessage);
     } catch (err) {
       console.log("error", err);
     }
