@@ -1,0 +1,29 @@
+.message-row {
+    display: flex;
+}
+
+.right-aligned {
+    justify-content: flex-end;
+}
+
+.message {
+    max-width: 70%;
+    /* border: 1px solid gray; */
+    border-radius: 10px;
+    padding: 5px;
+    margin-top: 10px;
+    background-color: #2f5d4b;
+    color: white;
+}
+
+.message-text {
+    margin-right: 20px;
+    font-size: .9rem;
+}
+
+.message-time {
+    margin-left: 20px;
+    font-size: .75rem;
+    float: right;
+    color: rgb(223, 220, 220);
+}
