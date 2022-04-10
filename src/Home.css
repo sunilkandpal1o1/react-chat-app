@@ -21,7 +21,6 @@
 .chatSection {
     width: 70%;
     height: 100%;
-    background-color: blue;
 }
 
 @media screen and (max-width: 500px) {
@@ -136,11 +135,20 @@
 }
 .chat-window {
     height: calc( 100% - 130px );
+    overflow-y: auto;
+    padding: 0 10px;
+    padding-bottom: 5px;
+    background: url("/public/chat-background.png");
+    background-repeat: repeat;
+    background-color: #141b20;
+    background-blend-mode: overlay;
+    display: flex;
+    flex-direction: column-reverse;
 }
 
 .chat-form {
     height: 60px;
-    background: pink;
+    background-color:  #111b21;
     padding: 10px 20px;
     display: flex;
     align-items: center;
@@ -149,22 +157,36 @@
 
 .chat-input {
     width: 370px;
+    width: 90%;
     height: 40px;
     border: none;
     outline: none;
     border-radius: 14px;
     padding: 5px 10px;
+    background-color: #25333b;
+    color: rgb(243, 238, 238);
+}
+
+.chat-input::placeholder {
+    color: rgb(191, 195, 193);
 }
 
 .chat-input:focus {
-    background-color: rgba(244, 245, 244, 0.966);
+    background-color: #2d3d46;
 }
 
 .chat-send--btn {
     border: none;
-    border-radius: 5px;
+    border-radius: 50%;
     padding: 5px 10px;
-    font-size: 1rem;
+    font-size: 1.2rem;
     cursor: pointer;
+    background-color: #1c282f;
+    color: white;
+}
+
+.chat-send--btn:disabled {
+    cursor: default;
+    color: rgb(180, 180, 182);
 }
 
